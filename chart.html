@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PI Bar Chart</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Roboto', sans-serif;
+      background-color: #f0f8ff;
+      color: #333;
+      text-align: center;
+      padding: 20px;
+    }
+    header {
+      background: linear-gradient(135deg, #4facfe, #00f2fe);
+      color: #fff;
+      padding: 20px 0;
+      margin-bottom: 30px;
+    }
+    h1 {
+      margin: 0;
+      font-size: 2.2rem;
+    }
+    .back-button {
+      display: inline-block;
+      margin: 15px 0;
+      padding: 8px 16px;
+      background-color: #4facfe;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .back-button:hover {
+      background-color: #00c6ff;
+    }
+    #chart-container {
+      width: 100%;
+      max-width: 1200px;
+      height: 1000px; /* ensure enough height */
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>PI Bar Chart (4Raw number)</h1>
+  </header>
+  <a href="index.html" class="back-button">← Back to Home</a>
+  <div id="chart-container">
+    <canvas id="piChart"></canvas>
+  </div>
+
+  <script>
+    fetch('https://script.google.com/macros/s/AKfycbxWvMUPX6a5OiBVD5V615IxXOFcHhNKNI0xmGEYAe1LMKQm5D3kPkZW4Exr9h87ktVWEw/exec')
+      .then(response => response.json())
+      .then(obj => {
+        const data = obj.data; 
+
+        const columnKey = '4Raw number';
+        const classKey = 'Class and Build';
+
+        const cleaned = data
+          .map(item => ({
+            label: item[classKey],
+            value: parseFloat(item[columnKey])
+          }))
+          .filter(item => !isNaN(item.value) && item.label);
+
+        if (cleaned.length === 0) {
+          console.error('No valid data found for chart.');
+          return;
+        }
+
+        // Sort descending
+        cleaned.sort((a, b) => b.value - a.value);
+
+        const labels = cleaned.map(item => item.label);
+        const values = cleaned.map(item => item.value);
+
+        const ctx = document.getElementById('piChart').getContext('2d');
+
+        new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: '4Raw number',
+              data: values,
+              backgroundColor: '#4facfe'
+            }]
+          },
+          options: {
+            responsive: true,
+            indexAxis: 'y',
+            maintainAspectRatio: false,
+            scales: {
+              x: {
+                beginAtZero: true
+              }
+            }
+          }
+        });
+      })
+      .catch(error => {
+        console.error('Error loading or parsing data:', error);
+      });
+  </script>
+</body>
+</html>

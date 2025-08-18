@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Ulria</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #1e1e1e;
+      --text: #f0f0f0;
+      --accent: #8b735b;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Roboto', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 40px;
+      box-sizing: border-box;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 3rem;
+      margin-bottom: 40px;
+      color: var(--text);
+    }
+
+    .nav-buttons {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      margin-bottom: 40px;
+    }
+
+    .nav-buttons a {
+      padding: 14px 28px;
+      background-color: #2dbeb5;
+      border: none;
+      border-radius: 10px;
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #1e1e1e;
+      cursor: pointer;
+      text-decoration: none;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+      transition: background-color 0.25s ease;
+    }
+
+    .nav-buttons a:hover {
+      background-color: #26a7a0;
+    }
+
+    .class-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .dropdown {
+      position: relative;
+    }
+
+    .class-btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 12px;
+    }
+
+    .class-btn img {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .class-btn span {
+      flex-grow: 1;
+      text-align: left;
+    }
+
+    .class-btn:hover {
+      box-shadow: 0 0 12px 3px rgba(255, 255, 255, 0.25);
+      transform: translateY(-2px);
+    }
+
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      top: 0;
+      left: 100%;
+      background-color: #2c2c2c;
+      color: var(--text);
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+      padding: 10px;
+      white-space: nowrap;
+      z-index: 1000;
+    }
+
+    .dropdown:hover > .dropdown-content {
+      display: block;
+    }
+
+    .dropdown-content .spec {
+      position: relative;
+      padding: 8px 16px;
+      font-weight: bold;
+      cursor: default;
+      border-left: 4px solid transparent;
+    }
+
+    .dropdown-content .spec:hover {
+      background-color: #383838;
+      border-left-color: var(--accent);
+    }
+
+    .hero-talents {
+      display: none;
+      position: absolute;
+      top: 0;
+      left: 100%;
+      background-color: #2c2c2c;
+      color: var(--text);
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+      padding: 10px;
+      white-space: nowrap;
+      z-index: 1000;
+    }
+
+    .spec:hover .hero-talents {
+      display: block;
+    }
+
+    .hero-talents a {
+      display: block;
+      padding: 6px 14px;
+      color: var(--text);
+      text-decoration: none;
+      border-radius: 4px;
+    }
+
+    .hero-talents a:hover {
+      background-color: var(--accent);
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <h1>Ulria</h1>
+
+  <div class="nav-buttons">
+    <a href="table.html">PI Data</a>
+    <a href="chart.html">PI Bar Chart</a>
+  </div>
+
+  <div class="class-grid"></div>
+
+  <script>
+    const classColors = {
+      "Death Knight": { bg: "#C41E3A", text: "#fff" },
+      "Demon Hunter": { bg: "#A330C9", text: "#fff" },
+      "Druid": { bg: "#FF7C0A", text: "#000" },
+      "Evoker": { bg: "#33937F", text: "#fff" },
+      "Hunter": { bg: "#AAD372", text: "#000" },
+      "Mage": { bg: "#3FC7EB", text: "#000" },
+      "Monk": { bg: "#00FF98", text: "#000" },
+      "Paladin": { bg: "#F48CBA", text: "#000" },
+      "Priest": { bg: "#FFFFFF", text: "#000" },
+      "Rogue": { bg: "#FFF468", text: "#000" },
+      "Shaman": { bg: "#0070DD", text: "#fff" },
+      "Warlock": { bg: "#8788EE", text: "#fff" },
+      "Warrior": { bg: "#C69B6D", text: "#000" }
+    };
+
+    const talentData = {
+      "Death Knight": {
+        "Unholy": ["Sanlayn", "Rider of the Apocalypse"],
+        "Frost": ["Rider of the Apocalypse", "Deathbringer"],
+        "Blood": ["Sanlayn", "Deathbringer"]
+      },
+      "Demon Hunter": {
+        "Havoc": ["Aldrachi Reaver", "Fel-Scarred"],
+        "Vengeance": ["Aldrachi Reaver", "Fel-Scarred"]
+      },
+      "Druid": {
+        "Balance": ["Keeper of the Grove", "Elunes Chosen"],
+        "Feral": ["Wildstalker", "Druid of the Claw"],
+        "Guardian": ["Elunes Chosen", "Druid of the Claw"],
+        "Restoration": ["Keeper of the Grove", "Wildstalker"]
+      },
+      "Evoker": {
+        "Devastation": ["Flameshaper", "Scalecommander"],
+        "Augmentation": ["Scalecommander", "Chronowarden"],
+        "Preservation": ["Flameshaper", "Chronowarden"]
+      },
+      "Hunter": {
+        "Survival": ["Pack Leader", "Sentinel"],
+        "Marksmanship": ["Sentinel", "Dark Ranger"],
+        "Beast Mastery": ["Dark Ranger", "Pack Leader"]
+      },
+      "Mage": {
+        "Arcane": ["Sunfury", "Spellslinger"],
+        "Fire": ["Sunfury", "Frostfire"],
+        "Frost": ["Frostfire", "Spellslinger"]
+      },
+      "Monk": {
+        "Windwalker": ["ShadoPan", "Conduit of the Celestials"],
+        "Brewmaster": ["ShadoPan", "Master of Harmony"],
+        "Mistweaver": ["Master of Harmony", "Conduit of the Celestials"]
+      },
+      "Paladin": {
+        "Retribution": ["Templar", "Herald of the Sun"],
+        "Protection": ["Templar", "Lightsmith"],
+        "Holy": ["Lightsmith", "Herald of the Sun"]
+      },
+      "Priest": {
+        "Shadow": ["Voidweaver", "Archon"],
+        "Discipline": ["Voidweaver", "Oracle"],
+        "Holy": ["Oracle", "Archon"]
+      },
+      "Rogue": {
+        "Assassination": ["Deathstalker", "Fatebound"],
+        "Outlaw": ["Fatebound", "Trickster"],
+        "Subtlety": ["Trickster", "Deathstalker"]
+      },
+      "Shaman": {
+        "Elemental": ["Stormbringer", "Farseer"],
+        "Enhancement": ["Stormbringer", "Totemic"],
+        "Restoration": ["Farseer", "Totemic"]
+      },
+      "Warlock": {
+        "Affliction": ["Hellcaller", "Soul Harvester"],
+        "Destruction": ["Hellcaller", "Diabolist"],
+        "Demonology": ["Diabolist", "Soul Harvester"]
+      },
+      "Warrior": {
+        "Arms": ["Colossus", "Slayer"],
+        "Fury": ["Slayer", "Mountain Thane"],
+        "Protection": ["Colossus", "Mountain Thane"]
+      }
+    };
+
+    const grid = document.querySelector('.class-grid');
+
+    function getIconUrl(className) {
+      return `https://wow.zamimg.com/images/wow/icons/medium/class_${className.toLowerCase().replace(/\s+/g, '')}.jpg`;
+    }
+
+    Object.entries(talentData).forEach(([className, specs]) => {
+      const classWrapper = document.createElement('div');
+      classWrapper.classList.add('dropdown');
+
+      const classBtn = document.createElement('button');
+      classBtn.className = 'class-btn';
+
+      const color = classColors[className] || { bg: '#666', text: '#fff' };
+      classBtn.style.backgroundColor = color.bg;
+      classBtn.style.color = color.text;
+
+      const icon = document.createElement('img');
+      icon.src = getIconUrl(className);
+      icon.alt = `${className} icon`;
+
+      const label = document.createElement('span');
+      label.textContent = className;
+
+      classBtn.appendChild(icon);
+      classBtn.appendChild(label);
+      classWrapper.appendChild(classBtn);
+
+      const specMenu = document.createElement('div');
+      specMenu.className = 'dropdown-content';
+
+      Object.entries(specs).forEach(([specName, talents]) => {
+      const specItem = document.createElement('div');
+      specItem.className = 'spec';
+
+      const specLink = document.createElement('a');
+      const specFile = `${className}${specName}`.toLowerCase().replace(/[^a-z0-9]/g, '') + '.html';
+      specLink.href = specFile;
+      specLink.textContent = specName;
+      specLink.style.color = 'inherit';
+      specLink.style.textDecoration = 'none';
+
+      specItem.appendChild(specLink);
+
+        const heroMenu = document.createElement('div');
+        heroMenu.className = 'hero-talents';
+
+        talents.forEach(hero => {
+          const link = document.createElement('a');
+          const fileName = `${className}-${specName}-${hero}`
+            .toLowerCase()
+            .replace(/[^a-z0-9]/g, '');
+          link.href = `${fileName}.html`;
+          link.textContent = hero;
+          heroMenu.appendChild(link);
+        });
+
+        specItem.appendChild(heroMenu);
+        specMenu.appendChild(specItem);
+      });
+
+      classWrapper.appendChild(specMenu);
+      grid.appendChild(classWrapper);
+    });
+  </script>
+</body>
+</html>
+

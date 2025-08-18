@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>5 Minute PI Data</title>
+  <!-- DataTables CSS -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/2.3.2/css/dataTables.dataTables.css"/>
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Roboto', sans-serif;
+      background-color: #f0f8ff;
+      color: #333;
+    }
+    header {
+      background: linear-gradient(135deg, #4facfe, #00f2fe);
+      color: #fff;
+      text-align: center;
+      padding: 20px 0;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    h1 {
+      margin: 0;
+      font-size: 2.5rem;
+    }
+    .table-container {
+      max-width: 95%;
+      margin: 30px auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+    table.dataTable {
+      border-collapse: collapse !important;
+      width: 100% !important;
+    }
+    table.dataTable thead {
+      background-color: #4facfe;
+      color: #fff;
+    }
+    table.dataTable tbody tr:hover {
+      background-color: #e6f7ff;
+    }
+    table.dataTable th,
+    table.dataTable td {
+      padding: 12px 15px;
+    }
+    .back-button {
+      display: inline-block;
+      margin-bottom: 15px;
+      padding: 8px 16px;
+      background-color: #4facfe;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .back-button:hover {
+      background-color: #00c6ff;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>5 Minute PI Data</h1>
+  </header>
+  <div class="table-container">
+    <a href="index.html" class="back-button">← Back to Home</a>
+    <table id="Sheet13" class="display">
+      <thead>
+        <tr>
+          <th>Class and Build</th>
+          <th>0p no PI</th>
+          <th>0p PI</th>
+          <th>0Raw number</th>
+          <th>0% gain</th>
+          <th>2p no PI</th>
+          <th>2p PI</th>
+          <th>2Raw number</th>
+          <th>2% gain</th>
+          <th>4p no PI</th>
+          <th>4p PI</th>
+          <th>4Raw number</th>
+          <th>4% gain</th>
+        </tr>
+      </thead>
+    </table>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+  <script src="https://cdn.datatables.net/2.3.2/js/dataTables.js"></script>
+  <script>
+    new DataTable('#Sheet13', {
+      ajax: 'https://script.google.com/macros/s/AKfycbxWvMUPX6a5OiBVD5V615IxXOFcHhNKNI0xmGEYAe1LMKQm5D3kPkZW4Exr9h87ktVWEw/exec',
+      columns: [
+        { data: 'Class and Build' },
+        { data: '0p no PI' },
+        { data: '0p PI' },
+        { data: '0Raw number' },
+        { data: '0% gain' },
+        { data: '2p no PI' },
+        { data: '2p PI' },
+        { data: '2Raw number' },
+        { data: '2% gain' },
+        { data: '4p no PI' },
+        { data: '4p PI' },
+        { data: '4Raw number' },
+        { data: '4% gain' }
+      ],
+      paging: false,       // Show all entries, no pagination
+      lengthChange: false, // Remove the length menu
+      searching: true      // Keep the search box active
+    });
+  </script>
+</body>
+</html>
