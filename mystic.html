@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Mystic</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Roboto', sans-serif;
+      background-color: #1e1e1e;
+      color: #f0f0f0;
+      min-height: 100vh;
+      padding: 60px 40px;
+      box-sizing: border-box;
+      text-align: center;
+    }
+
+    a.back-btn {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background-color: #2dbeb5;
+      color: #1e1e1e;
+      font-weight: 700;
+      border-radius: 10px;
+      padding: 10px 18px;
+      text-decoration: none;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+      transition: background-color 0.25s ease;
+    }
+    a.back-btn:hover {
+      background-color: #26a7a0;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    #toggleView {
+      background-color: #2dbeb5;
+      color: #1e1e1e;
+      font-weight: 700;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 20px;
+      cursor: pointer;
+      margin-bottom: 20px;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+      transition: background-color 0.25s ease;
+    }
+    #toggleView:hover {
+      background-color: #26a7a0;
+    }
+
+    #searchBar {
+      width: 300px;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      margin-bottom: 20px;
+      font-size: 1rem;
+      outline: none;
+    }
+
+    table {
+      margin: 0 auto;
+      border-collapse: collapse;
+      width: 60%;
+      background: #2c2c2c;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 12px 20px;
+      border-bottom: 1px solid #444;
+    }
+
+    th {
+      background: #2dbeb5;
+      color: #1e1e1e;
+      font-weight: 700;
+    }
+
+    tr:hover {
+      background-color: #383838;
+    }
+
+    canvas {
+      max-width: 800px;
+      margin: 40px auto;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <a href="index.html" class="back-btn">← Back to Index</a>
+
+  <h1>Mystic</h1>
+
+  
+  <input type="text" id="searchBar" placeholder="Search classes...">
+
+  <div id="tableContainer">
+    <table id="dataTable">
+      <thead>
+        <tr><th>Class</th><th>Value</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <canvas id="chartContainer" style="display: none;"></canvas>
+
+  <script>
+    const SHEET_ID = "1XUqip3Qsyq0vdbFlfQ6_xsDrLnTvyiZdVNnu57FXF1g"; 
+    const RANGE = "mystic!A1:M19";
+    const API_KEY = "AIzaSyAFaB5BGPvgKgh0wKaxPfOhDZQM2uZ4pJM"; 
+
+    const classColors = {
+      "Death Knight": "#C41E3A",
+      "Demon Hunter": "#A330C9",
+      "Druid": "#FF7C0A",
+      "Evoker": "#33937F",
+      "Hunter": "#AAD372",
+      "Mage": "#3FC7EB",
+      "Monk": "#00FF98",
+      "Paladin": "#F48CBA",
+      "Priest": "#FFFFFF",
+      "Rogue": "#FFF468",
+      "Shaman": "#0070DD",
+      "Warlock": "#8788EE",
+      "Warrior": "#C69B6D"
+    };
+
+    // Identify class color based on row text
+    function getClassColor(name) {
+      for (const className in classColors) {
+        if (name.toLowerCase().includes(className.toLowerCase())) {
+          return classColors[className];
+        }
+      }
+      return "#2dbeb5"; // fallback
+    }
+
+
+    const table = document.querySelector("#dataTable tbody");
+    const chartContainer = document.getElementById("chartContainer");
+    const toggleBtn = document.getElementById("toggleView");
+    const searchBar = document.getElementById("searchBar");
+    let chartInstance;
+
+    async function fetchData() {
+      const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${RANGE}?key=${API_KEY}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      const rows = data.values.slice(0); // skip headers
+      renderTable(rows);
+      renderChart(rows);
+    }
+
+   function renderTable(rows) {
+  const table = document.querySelector("#dataTable tbody");
+  const thead = document.querySelector("#dataTable thead");
+
+  if (rows.length === 0) return;
+
+  const columnCount = rows[0].length; // number of headers
+  // Pad each row to full length
+  const paddedRows = rows.map(r => {
+    const row = [...r];
+    while (row.length < columnCount) row.push("");
+    return row;
+  });
+
+  // First row as headers
+  const headers = paddedRows[0];
+  thead.innerHTML = "<tr>" + headers.map(h => `<th>${h}</th>`).join("") + "</tr>";
+
+  // Remaining rows as data
+  table.innerHTML = "";
+  paddedRows.slice(1).forEach(row => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = row.map(cell => `<td>${cell}</td>`).join("");
+    table.appendChild(tr);
+  });
+}
+
+    /* function renderChart(rows) {
+      const labels = rows.map(r => r[1]);
+      const values = rows.map(r => parseFloat(r[0]));
+      const colors = labels.map(label => getClassColor(label))
+
+    
+
+      if (chartInstance) chartInstance.destroy();
+      chartInstance = new Chart(chartContainer, {
+        type: "bar",
+        data: {
+          labels,
+          datasets: [{
+            label: "Raw Sim DPS (5mins)",
+            data: values,
+            backgroundColor: colors,
+          }]
+        },
+        options: {
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { ticks: { color: "#f0f0f0" } },
+            y: { ticks: { color: "#f0f0f0" } }
+          }
+        }
+      });
+    }  */
+
+    /* toggleBtn.addEventListener("click", () => {
+      const isTableVisible = document.getElementById("tableContainer").style.display !== "none";
+      document.getElementById("tableContainer").style.display = isTableVisible ? "none" : "block";
+      chartContainer.style.display = isTableVisible ? "block" : "none";
+      toggleBtn.textContent = isTableVisible ? "Switch to Table View" : "Switch to Bar Chart";
+    }); */
+
+    searchBar.addEventListener("keyup", () => {
+      const term = searchBar.value.toLowerCase();
+      const rows = table.querySelectorAll("tr");
+      rows.forEach(r => {
+        const text = r.textContent.toLowerCase();
+        r.style.display = text.includes(term) ? "" : "none";
+      });
+    });
+
+    fetchData();
+  </script>
+
+</body>
+</html>
