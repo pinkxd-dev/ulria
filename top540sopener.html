@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Top 5 on CD</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 40px;
+      font-family: 'Roboto', sans-serif;
+      background-color: #1e1e1e;
+      color: #f0f0f0;
+      min-height: 100vh;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2.5rem;
+      margin-bottom: 30px;
+    }
+
+    table {
+      width: 60%;
+      margin: 0 auto 40px auto;
+      border-collapse: collapse;
+      background-color: #2c2c2c;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    }
+
+    th, td {
+      padding: 14px 20px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #2dbeb5;
+      color: #1e1e1e;
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+
+    tr:nth-child(even) {
+      background-color: #252525;
+    }
+
+    tr:hover {
+      background-color: #333;
+    }
+
+    canvas {
+      display: block;
+      width: 80%;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .footer {
+      text-align: center;
+      color: #888;
+      font-size: 0.9rem;
+      margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+
+    <a href="index.html" style="
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background-color: #2dbeb5;
+  color: #1e1e1e;
+  font-weight: 700;
+  border-radius: 10px;
+  padding: 10px 18px;
+  text-decoration: none;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+  transition: background-color 0.25s ease;
+">← Back to Index</a>
+
+<script>
+  // hover shit
+  const backBtn = document.querySelector('a[href="index.html"]');
+  backBtn.addEventListener('mouseover', () => backBtn.style.backgroundColor = '#26a7a0');
+  backBtn.addEventListener('mouseout', () => backBtn.style.backgroundColor = '#2dbeb5');
+</script>
+
+  <h1>Top 5 in 40s Opener</h1>
+
+
+  <table id="data-table">
+    <thead>
+      <tr>
+        <th>Class and Spec</th>
+        <th>DPS</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <canvas id="chart"></canvas>
+
+  <div class="footer">Data automatically pulled from Google Sheets</div>
+
+  <script>
+    // === CONFIG ===
+    const SHEET_ID = "1XUqip3Qsyq0vdbFlfQ6_xsDrLnTvyiZdVNnu57FXF1g";
+    const API_KEY = "AIzaSyAFaB5BGPvgKgh0wKaxPfOhDZQM2uZ4pJM";
+    const RANGE = "top540sopener!A1:B6"; // Sheet name and range
+
+    // === WoW CLASS COLORS (same as index.html) ===
+    const classColors = {
+      "Death Knight": "#C41E3A",
+      "Demon Hunter": "#A330C9",
+      "Druid": "#FF7C0A",
+      "Evoker": "#33937F",
+      "Hunter": "#AAD372",
+      "Mage": "#3FC7EB",
+      "Monk": "#00FF98",
+      "Paladin": "#F48CBA",
+      "Priest": "#FFFFFF",
+      "Rogue": "#FFF468",
+      "Shaman": "#0070DD",
+      "Warlock": "#8788EE",
+      "Warrior": "#C69B6D"
+    };
+
+    // Identify class color based on row text
+    function getClassColor(name) {
+      for (const className in classColors) {
+        if (name.toLowerCase().includes(className.toLowerCase())) {
+          return classColors[className];
+        }
+      }
+      return "#2dbeb5"; // fallback
+    }
+
+    async function fetchSheetData() {
+      const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${RANGE}?key=${API_KEY}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      return data.values;
+    }
+
+    function renderTable(values) {
+      const tbody = document.querySelector("#data-table tbody");
+      tbody.innerHTML = "";
+      values.slice(1).forEach(row => {
+        const tr = document.createElement("tr");
+        row.forEach(cell => {
+          const td = document.createElement("td");
+          td.textContent = cell;
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderChart(values) {
+      const labels = values.slice(1).map(r => r[0]);
+      const dpsData = values.slice(1).map(r => parseFloat(r[1].replace(/,/g, "")));
+      const colors = labels.map(label => getClassColor(label));
+
+      const ctx = document.getElementById("chart").getContext("2d");
+      new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: labels,
+          datasets: [{
+            label: "DPS",
+            data: dpsData,
+            backgroundColor: colors,
+            borderColor: "#111",
+            borderWidth: 1
+          }]
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: { color: "#f0f0f0" },
+              grid: { color: "#444" }
+            },
+            x: {
+              ticks: { color: "#f0f0f0" },
+              grid: { color: "#444" }
+            }
+          },
+          plugins: {
+            legend: { labels: { color: "#f0f0f0" } },
+            tooltip: {
+              callbacks: {
+                label: function(ctx) {
+                  return ctx.dataset.label + ": " + ctx.formattedValue;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    (async () => {
+      try {
+        const values = await fetchSheetData();
+        renderTable(values);
+        renderChart(values);
+      } catch (err) {
+        console.error("Error loading sheet:", err);
+        document.body.innerHTML += "<p style='text-align:center;color:#f88;'>Error loading data.</p>";
+      }
+    })();
+  </script>
+</body>
+</html>
